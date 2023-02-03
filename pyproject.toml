@@ -1,6 +1,6 @@
 [project]
 name="fsverity-hash"
-version="0.0.1"
+version="0.0.2"
 description="fs-verity digest implementation for Python"
 readme="README.md"
 license={file="LICENSE.txt"}
@@ -27,7 +27,7 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/moreati/fsdigest-hash"
+"Homepage" = "https://github.com/moreati/fsverity-hash"
 
 [build-system]
 requires = [
