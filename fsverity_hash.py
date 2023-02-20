@@ -18,6 +18,13 @@ class FSVerityAlgorithm(enum.IntEnum):
     sha256 = 1
     sha512 = 2
 
+    @classmethod
+    def from_name(cls, name: str) -> FSVerityAlgorithm:
+        try:
+            return cls[name]
+        except KeyError:
+            raise ValueError(f'Unsupported algorithm {name}')
+
     @property
     def digest_size(self):
         return self.value * (256 // 8)
@@ -25,11 +32,25 @@ class FSVerityAlgorithm(enum.IntEnum):
 
 class FSVerityBlock:
     def __init__(self, data=b'', *, algorithm=DEFAULT_ALGORITHM, size=DEFAULT_BLOCK_SIZE):
-        self.algorithm = FSVerityAlgorithm[algorithm]
+        self.algorithm = FSVerityAlgorithm.from_name(algorithm)
         self.data_size = 0
         self.hash = hashlib.new(self.algorithm.name)
         self.size = size
         self.update(data)
+
+    @staticmethod
+    def _check_size(algorithm: FSVerityAlgorithm, size: int) -> int:
+        try:
+            isize = int(size)
+        except TypeError:
+            raise TypeError(f'Block size must be an integer, not {type(size)}')
+
+        if not math.log2(isize).is_integer() or isize < 2 * algorithm.digest_size:
+            raise ValueError(
+                f'Invalid block size {size}, '
+                f'must be a power of 2 and >= twice algoritm digest size',
+            )
+        return isize
 
     def update(self, data):
         assert (self.data_size + len(data)) <= self.size
@@ -62,8 +83,8 @@ class FSVerityHash:
     version = 1
 
     def __init__(self, data=b'', *, algorithm=DEFAULT_ALGORITHM, block_size=DEFAULT_BLOCK_SIZE):
-        self.algorithm = FSVerityAlgorithm[algorithm]
-        self.block_size = block_size
+        self.algorithm = FSVerityAlgorithm.from_name(algorithm)
+        self.block_size = FSVerityBlock._check_size(self.algorithm, block_size)
         self.data_size = 0
         self.hashes = []
         self.update(data)
