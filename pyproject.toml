@@ -1,6 +1,6 @@
 [project]
 name="fsverity-hash"
-version="0.0.4"
+version="0.0.5"
 description="fs-verity digest implementation for Python"
 readme="README.md"
 license={text = "MIT License"}
