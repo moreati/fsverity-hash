@@ -233,3 +233,45 @@ __all__ = [
     FSVerityBlock.__name__,
     FSVerityHash.__name__,
 ]
+
+
+if __name__ == '__main__':
+    import argparse
+    import io
+    import sys
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        '--hash-alg', default=DEFAULT_ALGORITHM,
+        choices=tuple(e.name for e in FSVerityAlgorithm),
+        help='Merkle tree block hashing algorithm (default: %(default)s)',
+    )
+    parser.add_argument(
+        '--block-size', default=DEFAULT_BLOCK_SIZE, metavar='BYTES', type=int,
+        help='Merkle tree block size in bytes (default: %(default)s)',
+    )
+    parser.add_argument(
+        '--compact', action='store_true',
+        help='Omit the hash algorithm name when printing digests',
+    )
+    parser.add_argument(
+        'files', default=[sys.stdin.buffer], metavar='FILE', nargs='*',
+        type=argparse.FileType('rb'),
+        help='Input file(s) to process (default: stdin)',
+    )
+    args = parser.parse_args()
+
+    for file in args.files:
+        with file as f:
+            file_hash = FSVerityHash(
+                algorithm=args.hash_alg,
+                block_size=args.block_size,
+            )
+            while data := f.read(io.DEFAULT_BUFFER_SIZE):
+                file_hash.update(data)
+
+            if args.compact:
+                line = f'{file_hash.hexdigest()} {file.name}'
+            else:
+                line = f'{file_hash.algorithm.name}:{file_hash.hexdigest()} {file.name}'
+        print(line)

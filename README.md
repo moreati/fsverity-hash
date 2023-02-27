@@ -29,12 +29,38 @@ $ fsverity digest file.txt
 sha256:3ed673d5323c9e1c60820f207464b0b858a90ba4ff940b123dd16b425699cebe file.txt
 ```
 
+The module exposes the same command line interface as `fsverity digest`
+
+```
+$ echo -n "Nobody inspects the spammish repetition" > spam.txt
+$ fsverity digest spam.txt
+sha256:3ed673d5323c9e1c60820f207464b0b858a90ba4ff940b123dd16b425699cebe spam.txt
+$ python3 -m fsverity_hash spam.txt
+sha256:3ed673d5323c9e1c60820f207464b0b858a90ba4ff940b123dd16b425699cebe spam.txt
+$ python3 -m fsverity_hash --help
+usage: fsverity_hash.py [-h] [--hash-alg {sha256,sha512}] [--block-size BYTES]
+                        [--compact]
+                        [FILE ...]
+
+Compute fs-verity hashes
+
+positional arguments:
+  FILE                  Input file(s) to process (default: stdin)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --hash-alg {sha256,sha512}
+                        Merkle tree block hashing algorithm (default: sha256)
+  --block-size BYTES    Merkle tree block size in bytes (default: 4096)
+  --compact             Omit the hash algorithm name when printing digests
+```
+
 ## Limitations
 
 - Upto 8 GiB can be hashed. This is an implementation limit, not a limitation of fs-verity hashes in general.
 - Salted hashes aren't implemented.
 - No automated tests.
-- No testing of custom block sizes or SHA512 algorithm.
+- No testing of custom block sizes.
 - `FSVerityHash` objects cannot be copied.
 
 ## Other implementations
